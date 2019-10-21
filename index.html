@@ -6,11 +6,11 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="zend-mvc-plugin-fileprg: Post-Redirect-Get controller plugin specifically for zend-mvc, specifically for handling file uploads">  
+    <meta name="description" content="Post/Redirect/Get plugin with file upload handling for zend-mvc controllers">  
     <link rel="canonical" href="https://docs.zendframework.com/zend-mvc-plugin-fileprg/">
     <link rel="shortcut icon" href="img/favicon.ico">
 
-    <title>zend-mvc-plugin-fileprg - zend-mvc-plugin-fileprg - Zend Framework Docs</title>
+    <title>zend-mvc-plugin-fileprg - Zend Framework Docs</title>
 
     <link rel="stylesheet" href="css/styles-5cfabd53ee.css">
 </head>
@@ -140,11 +140,7 @@
         <li><a href="https://docs.zendframework.com/">Documentation</a></li>
 
         
-            <li><a href=".">zend-mvc-plugin-fileprg</a></li>
-
-            
-
-            <li class="active">zend-mvc-plugin-fileprg</li>
+            <li>zend-mvc-plugin-fileprg</li>
         
     
 </ol>
@@ -154,12 +150,93 @@
 
 
     <h1>zend-mvc-plugin-fileprg</h1>
-<p>zend-mvc-plugin-fileprg: Post-Redirect-Get controller plugin specifically for zend-mvc, specifically for handling file uploads</p>
+<p>Post/Redirect/Get plugin with file upload handling for zend-mvc controllers</p>
 
 
-    <h2>Installation</h2>
-    <h3>Using Composer</h3>
-    <pre><code class="language-bash">$ composer require zendframework/zend-mvc-plugin-fileprg</code></pre>
+    <h2 id="installation">Installation</h2>
+<p>Install via composer:</p>
+<p> <pre class=codehilite><code class=language-bash>$ composer require zendframework/zend-mvc-plugin-fileprg</code></pre></p>
+<p>If you are using the <a href="https://docs.zendframework.com/zend-component-installer/">zend-component-installer</a>,
+you're done!</p>
+<p>If not, you will need to add the component as a module to your
+application. Add the entry <code>'Zend\Mvc\Plugin\FilePrg'</code> to
+your list of modules in your application configuration (typically
+one of <code>config/application.config.php</code> or <code>config/modules.config.php</code>).</p>
+<h2 id="usage">Usage</h2>
+<p>While similar to the <a href="https://docs.zendframework.com/zend-mvc-plugin-prg/">Post/Redirect/Get Plugin</a>,
+the File PRG Plugin will work for forms with file inputs.
+The difference is in the behavior: The File PRG Plugin will interact
+directly with your form instance and the file inputs, rather than
+<em>only</em> returning the POST params from the previous request.</p>
+<p>By interacting directly with the form, the File PRG Plugin will turn off any
+file inputs <code>required</code> flags for already uploaded files (for a partially valid
+form state), as well as run the file input filters to move the uploaded files
+into a new location (configured by the user).</p>
+<blockquote>
+<h3>Files must be relocated on upload</h3></h3>
+<p>You <strong>must</strong> attach a filter for moving the uploaded files to a new location, such as the
+<a href="https://docs.zendframework.com/zend-filter/file/#renameupload">RenameUpload Filter</a>,
+or else your files will be removed upon the redirect.</p>
+</blockquote>
+<p>This plugin is invoked with three arguments:</p>
+<ul>
+<li><code>$form</code>: the <code>Zend\Form\Form</code> instance.</li>
+<li><code>$redirect</code>: (Optional) a string containing the redirect
+  location, which can either be a named route or a URL, based on the
+  contents of the third parameter. If this argument is not provided, it
+  will default to the current matched route.</li>
+<li><code>$redirectToUrl</code>: (Optional) a boolean that when set to
+  <code>true</code>, causes the second parameter to be treated as a URL
+  instead of a route name (this is required when redirecting to a URL
+  instead of a route). This argument defaults to
+  <code>false</code>.</li>
+</ul>
+<h3>Example Usage</h3>
+<p> <pre class=codehilite><code class=language-php>$myForm = new Zend\Form\Form('my-form');
+$myForm-&gt;add([
+    'type' =&gt; 'Zend\Form\Element\File',
+    'name' =&gt; 'file',
+]);
+
+// NOTE: Without a filter to move the file,
+//       our files will disappear between the requests
+$myForm-&gt;getInputFilter()-&gt;getFilterChain()-&gt;attach(
+    new Zend\Filter\File\RenameUpload([
+        'target'    =&gt; './data/tmpuploads/file',
+        'randomize' =&gt; true,
+    ])
+);
+
+// Pass in the form and optional the route/url you want to redirect to after the POST
+$prg = $this-&gt;fileprg($myForm, '/user/profile-pic', true);
+
+if ($prg instanceof Zend\Http\PhpEnvironment\Response) {
+    // Returned a response to redirect us.
+    return $prg;
+}
+
+if ($prg === false) {
+    // First time the form was loaded.
+    return ['form' =&gt; $myForm];
+}
+
+// Form was submitted.
+// $prg is now an array containing the POST params from the previous request,
+// but we don't have to apply it to the form since that has already been done.
+
+// Process the form
+if ($form-&gt;isValid()) {
+    // ...Save the form...
+    return $this-&gt;redirect()-&gt;toRoute('/user/profile-pic/success');
+}
+
+// Form not valid, but file uploads might be valid and uploaded
+$fileErrors = $form-&gt;get('file')-&gt;getMessages();
+if (empty($fileErrors)) {
+    $tempFile = $form-&gt;get('file')-&gt;getValue();
+}</code></pre></p>
+
+    
 
 
 <h2>Support</h2>
@@ -175,6 +252,15 @@
 
 
 
+
+    <div class="help-wanted">
+        <p>
+            Found a mistake or want to contribute to the documentation?
+            <a href="https://github.com/zendframework/zend-mvc-plugin-fileprg/edit/master/docs/book/index.md" target="_blank" class="help-wanted__link">
+                Edit this page on GitHub!
+            </a>
+        </p>
+    </div>
 
                 
             <!-- content:end -->
@@ -301,5 +387,5 @@
 
 <!--
 MkDocs version : 1.0.4
-Build Date UTC : 2019-10-01 20:24:50
+Build Date UTC : 2019-10-21 21:20:53
 -->
