@@ -2,7 +2,7 @@
 
 > ## Repository abandoned 2019-12-31
 >
-> This repository has moved to laminas/laminas-mvc-plugin-fileprg.
+> This repository has moved to [laminas/laminas-mvc-plugin-fileprg](https://github.com/laminas/laminas-mvc-plugin-fileprg).
 
 [![Build Status](https://secure.travis-ci.org/zendframework/zend-mvc-plugin-fileprg.svg?branch=master)](https://secure.travis-ci.org/zendframework/zend-mvc-plugin-fileprg)
 [![Coverage Status](https://coveralls.io/repos/github/zendframework/zend-mvc-plugin-fileprg/badge.svg?branch=master)](https://coveralls.io/github/zendframework/zend-mvc-plugin-fileprg?branch=master)
